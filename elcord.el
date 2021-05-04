@@ -153,6 +153,11 @@ Swap this with your own function if you want a custom buffer-details message."
   :type 'boolean
   :group 'elcord)
 
+(defcustom elcord-show-org-clock 'nil
+  "When enabled, show the org-clock status if present."
+  :type 'boolean
+  :group 'elcord)
+
 (defcustom elcord-boring-buffers-regexp-list '("^ "
                                                "\\\\*Messages\\\\*")
   "A list of regexp's to match boring buffers.
@@ -482,10 +487,12 @@ If no text is available, use the value of `mode-name'."
   (let ((activity (if elcord-display-buffer-details
                       (list
                        (cons "details" (funcall elcord-buffer-details-format-function))
-                       (cons "state" (format "Line %s (%s of %S)"
-                                             (format-mode-line "%l")
-                                             (format-mode-line "%l")
-                                             (+ 1 (count-lines (point-min) (point-max))))))
+                       (cons "state" (if (and elcord-show-org-clock (org-clock-is-active))
+                                         (org-clock-get-clock-string)
+                                       (format "Line %s (%s of %S)"
+                                               (format-mode-line "%l")
+                                               (format-mode-line "%l")
+                                               (+ 1 (count-lines (point-min) (point-max)))))))
                     (list
                      (cons "details" "Editing")
                      (cons "state" (elcord--mode-text))))))
